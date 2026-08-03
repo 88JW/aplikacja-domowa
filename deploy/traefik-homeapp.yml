@@ -1,0 +1,58 @@
+http:
+  routers:
+    homeapp-pwa-assets:
+      rule: "Host(`homeapp.miasoftware.pl`) && (Path(`/manifest.webmanifest`) || Path(`/sw.js`) || Path(`/icon.svg`) || Path(`/icon-192.png`) || Path(`/icon-512.png`) || Path(`/icon-512-maskable.png`) || Path(`/apple-touch-icon.png`) || PathPrefix(`/fonts/`) || Path(`/.well-known/assetlinks.json`) || Path(`/downloads/homeapp-tablet.apk`) || Path(`/tablet-start.html`) || Path(`/offline`) || Path(`/launch`))"
+      priority: 100
+      service: homeapp
+      entryPoints:
+        - websecure
+      middlewares:
+        - homeapp-security
+      tls:
+        certResolver: myresolver
+
+    homeapp:
+      rule: "Host(`homeapp.miasoftware.pl`)"
+      service: homeapp
+      entryPoints:
+        - websecure
+      middlewares:
+        - homeapp-security
+        - homeapp-sso
+      tls:
+        certResolver: myresolver
+
+  middlewares:
+    homeapp-security:
+      headers:
+        contentTypeNosniff: true
+        frameDeny: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+
+    homeapp-sso-clear-headers:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Email: ""
+          X-Forwarded-User: ""
+
+    homeapp-sso-forward:
+      forwardAuth:
+        address: "http://traefik-forward-auth:4181"
+        authResponseHeaders:
+          - X-Forwarded-User
+          - X-Forwarded-Email
+        trustForwardHeader: true
+
+    homeapp-sso:
+      chain:
+        middlewares:
+          - homeapp-sso-clear-headers
+          - homeapp-sso-forward
+
+  services:
+    homeapp:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.50.234:3002"

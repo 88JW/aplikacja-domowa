@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "pl.miasoftware.homeapp",
+      "sha256_cert_fingerprints": [
+        "0D:85:A9:46:C2:95:65:4B:B5:96:CF:E2:E7:DC:A0:F6:FC:5E:AE:E0:B2:09:4E:57:51:5C:2E:6F:A3:9D:FC:8B"
+      ]
+    }
+  }
+]

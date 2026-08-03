@@ -1,0 +1,44 @@
+{
+  "packageId": "pl.miasoftware.homeapp",
+  "host": "homeapp.miasoftware.pl",
+  "name": "Aplikacja domowa",
+  "launcherName": "Dom",
+  "display": "standalone",
+  "themeColor": "#39734b",
+  "themeColorDark": "#245c38",
+  "navigationColor": "#f4f7f2",
+  "navigationColorDark": "#172838",
+  "navigationDividerColor": "#dce5d9",
+  "navigationDividerColorDark": "#607386",
+  "backgroundColor": "#f4f7f2",
+  "enableNotifications": true,
+  "startUrl": "/tablet",
+  "iconUrl": "https://homeapp.miasoftware.pl/icon-512.png",
+  "maskableIconUrl": "https://homeapp.miasoftware.pl/icon-512-maskable.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./homeapp-release.jks",
+    "alias": "homeapp"
+  },
+  "appVersion": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://homeapp.miasoftware.pl/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "orientation": "landscape",
+  "minSdkVersion": 26,
+  "fingerprints": [
+    {
+      "name": "HomeApp ręczna dystrybucja",
+      "value": "0D:85:A9:46:C2:95:65:4B:B5:96:CF:E2:E7:DC:A0:F6:FC:5E:AE:E0:B2:09:4E:57:51:5C:2E:6F:A3:9D:FC:8B"
+    }
+  ],
+  "additionalTrustedOrigins": [],
+  "launchHandlerClientMode": "navigate-new"
+}

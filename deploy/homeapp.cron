@@ -1,0 +1,1 @@
+17 * * * * sh /home/wojciech/projects/homeapp/deploy/trigger-reminders.sh >> /home/wojciech/projects/homeapp/reminders-cron.log 2>&1
