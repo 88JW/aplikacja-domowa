@@ -153,6 +153,16 @@ Skrót:
 - pozwala dodać niezaplanowane wykonanie jednym kliknięciem,
 - może zostać usunięty bez usuwania zadania z katalogu.
 
+Na stronie głównej można też wybrać przycisk **„Powiedz”** przy polu „Co
+zrobiłeś?”. Przeglądarka rozpoznaje wypowiedź po polsku i porównuje ją z
+istniejącym katalogiem obowiązków. Gdy dopasowanie jest jednoznaczne, HomeApp
+automatycznie zapisuje wykonanie; w przeciwnym razie pokazuje tekst i zwykłe
+podpowiedzi do ręcznego wyboru. Przy braku dopasowania wyświetla też przycisk
+„Dodaj obowiązek”, który otwiera zwykły formularz katalogu z wypełnioną nazwą
+rozpoznanej czynności. Funkcja wymaga zgody na mikrofon i obsługi Web Speech
+API przez przeglądarkę (najpewniej działa w Chrome). Rozpoznawanie mowy
+realizuje przeglądarka — aplikacja nie zapisuje nagrań audio.
+
 ## Historia i korekty
 
 Historia pokazuje aktywne i cofnięte wykonania wszystkich domowników. Każdy
@@ -415,6 +425,8 @@ Najważniejsze tabele:
 - `achievement_definitions`
 - `profile_achievements`
 - `household_achievements`
+- `waste_bag_outings` — wystawione worki, oddzielnie dla każdego miesiąca
+- `waste_collection_days` — terminy oraz rodzaj odbioru śmieci
 
 ## Migracje
 
@@ -435,6 +447,7 @@ Migracje znajdują się w katalogu `database/migrations`.
 | `011_home_map_spaces.sql` | dokładne przestrzenie używane przez mapę domu |
 | `012_achievement_progress_and_reminders.sql` | postęp odznak, nowe połączenia i bezpieczne przypomnienia |
 | `013_indoor_plants.sql` | kwiaty domowe i cykl podlewania liczony od wykonania |
+| `014_waste_collection.sql` | liczenie wystawionych worków i kalendarz odbiorów |
 
 Migracje są uruchamiane kolejno za pomocą `psql` jako administrator bazy.
 

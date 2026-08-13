@@ -5,7 +5,13 @@ import Link from "next/link";
 import { CatalogTaskBrowser } from "./catalog-task-browser";
 import { createTaskAttribute, createTaskTemplate } from "./actions";
 
-export default async function CatalogPage() {
+export default async function CatalogPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ add?: string | string[] }>;
+}) {
+  const params = await searchParams;
+  const suggestedTaskName = typeof params.add === "string" ? params.add.slice(0, 100) : "";
   const user = await requireSsoUser();
   const context = await ensureHomeContext(user);
   const options = await getPlanningOptions(context);
@@ -74,7 +80,7 @@ export default async function CatalogPage() {
       </section>
 
       <section className="catalog-create-panels">
-        <details className="catalog-create-panel">
+        <details className="catalog-create-panel" id="new-task" open={Boolean(suggestedTaskName)}>
           <summary>
             <span aria-hidden="true">＋</span>
             <span>
@@ -91,6 +97,7 @@ export default async function CatalogPage() {
               <label>
                 Nazwa zadania
                 <input
+                  defaultValue={suggestedTaskName}
                   maxLength={100}
                   name="name"
                   placeholder="np. Wyczyścić kuwetę"
