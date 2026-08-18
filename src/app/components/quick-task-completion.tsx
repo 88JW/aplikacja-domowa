@@ -79,6 +79,7 @@ export function QuickTaskCompletion({ options }: { options: TaskOption[] }) {
   const [isListening, setIsListening] = useState(false);
   const [speechStatus, setSpeechStatus] = useState("");
   const [missingTaskName, setMissingTaskName] = useState("");
+  const [aiSuggestions, setAiSuggestions] = useState<TaskOption[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const normalizedQuery = normalize(query);
   const suggestions = useMemo(
@@ -95,6 +96,40 @@ export function QuickTaskCompletion({ options }: { options: TaskOption[] }) {
     setSelectedId(task.id);
     setQuery(task.label);
     setMissingTaskName("");
+    setAiSuggestions([]);
+  }
+
+  async function getAiMatch(transcript: string) {
+    try {
+      const response = await fetch("/api/task-match", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transcript }),
+      });
+      if (!response.ok) return null;
+      return (await response.json()) as {
+        available: boolean;
+        matchId: string | null;
+        suggestionIds: string[];
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  function applyTaskMatch(transcript: string, matchedTask: TaskOption | undefined) {
+    if (!matchedTask) {
+      setQuery(transcript);
+      setSelectedId("");
+      setMissingTaskName(transcript);
+      setAiSuggestions([]);
+      setSpeechStatus(`Usłyszeliśmy: „${transcript}”. Wybierz zadanie z podpowiedzi albo dodaj nowe.`);
+      return;
+    }
+
+    selectTask(matchedTask);
+    setSpeechStatus(`Usłyszeliśmy: „${transcript}”. Zapisujemy: ${matchedTask.label}`);
+    window.setTimeout(() => inputRef.current?.form?.requestSubmit(), 250);
   }
 
   function startListening() {
@@ -114,22 +149,36 @@ export function QuickTaskCompletion({ options }: { options: TaskOption[] }) {
     recognition.lang = "pl-PL";
     recognition.interimResults = false;
     recognition.continuous = false;
-    recognition.onresult = (event) => {
+    recognition.onresult = async (event) => {
       const transcript = event.results[event.results.length - 1]?.[0]?.transcript.trim();
       if (!transcript) return;
 
-      const matchedTask = getSpeechMatch(transcript, options);
-      setQuery(transcript);
-      if (!matchedTask) {
-        setSelectedId("");
-        setMissingTaskName(transcript);
-        setSpeechStatus(`Usłyszeliśmy: „${transcript}”. Wybierz zadanie z podpowiedzi.`);
-        return;
+      setSpeechStatus(`Usłyszeliśmy: „${transcript}”. Dopasowuję z pomocą AI…`);
+      const aiMatch = await getAiMatch(transcript);
+      if (aiMatch?.available) {
+        const matchedTask = aiMatch.matchId
+          ? options.find((task) => task.id === aiMatch.matchId)
+          : undefined;
+        if (matchedTask) {
+          applyTaskMatch(transcript, matchedTask);
+          return;
+        }
+
+        const suggestedTasks = aiMatch.suggestionIds
+          .map((id) => options.find((task) => task.id === id))
+          .filter((task): task is TaskOption => Boolean(task));
+        if (suggestedTasks.length > 0) {
+          setQuery(transcript);
+          setSelectedId("");
+            setMissingTaskName("");
+            setAiSuggestions([]);
+          setSpeechStatus(`Usłyszeliśmy: „${transcript}”. AI proponuje jedno z poniższych zadań.`);
+          setAiSuggestions(suggestedTasks);
+          return;
+        }
       }
 
-      selectTask(matchedTask);
-      setSpeechStatus(`Usłyszeliśmy: „${transcript}”. Zapisujemy: ${matchedTask.label}`);
-      window.setTimeout(() => inputRef.current?.form?.requestSubmit(), 250);
+      applyTaskMatch(transcript, getSpeechMatch(transcript, options) ?? undefined);
     };
     recognition.onerror = (event) => {
       setSpeechStatus(
@@ -192,8 +241,8 @@ export function QuickTaskCompletion({ options }: { options: TaskOption[] }) {
       )}
       {normalizedQuery && !selectedId && (
         <div className="quick-task-suggestions" role="listbox" aria-label="Podpowiedzi zadań">
-          {suggestions.length > 0 ? (
-            suggestions.map((task) => (
+          {(aiSuggestions.length > 0 ? aiSuggestions : suggestions).length > 0 ? (
+            (aiSuggestions.length > 0 ? aiSuggestions : suggestions).map((task) => (
               <button key={task.id} onClick={() => selectTask(task)} type="button">
                 {task.label}
               </button>

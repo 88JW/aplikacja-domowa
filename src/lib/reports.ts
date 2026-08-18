@@ -108,7 +108,7 @@ export async function getRanking(
   return result.rows;
 }
 
-export async function getWeeklyCompletionMatrix(
+export async function getMonthlyCompletionMatrix(
   context: HomeContext,
 ): Promise<CompletionMatrix> {
   const [membersResult, columnsResult, countsResult] = await Promise.all([
@@ -141,7 +141,7 @@ export async function getWeeklyCompletionMatrix(
         join home_tasks.task_templates tt on tt.id = tc.task_template_id
         where tc.household_id = $1
           and tc.undone_at is null
-          and tc.completed_at >= date_trunc('week', now())
+          and tc.completed_at >= date_trunc('month', now())
         group by tt.id, tt.name, tt.icon
         order by tt.name
       `,
@@ -160,7 +160,7 @@ export async function getWeeklyCompletionMatrix(
         from home_tasks.task_completions tc
         where tc.household_id = $1
           and tc.undone_at is null
-          and tc.completed_at >= date_trunc('week', now())
+          and tc.completed_at >= date_trunc('month', now())
         group by tc.completed_by, tc.task_template_id
       `,
       [context.householdId],

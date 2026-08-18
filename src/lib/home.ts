@@ -34,8 +34,8 @@ export type TodayTask = {
 export type DashboardData = {
   context: HomeContext;
   todayTasks: TodayTask[];
-  userWeeklyPoints: number;
-  householdWeeklyPoints: number;
+  userMonthlyPoints: number;
+  householdMonthlyPoints: number;
 };
 
 export async function ensureHomeContext(
@@ -266,7 +266,7 @@ export async function getDashboardData(
           where household_id = $1
             and completed_by = $2
             and undone_at is null
-            and completed_at >= date_trunc('week', now())
+            and completed_at >= date_trunc('month', now())
         `,
         [context.householdId, context.profileId],
       ),
@@ -276,7 +276,7 @@ export async function getDashboardData(
           from home_tasks.task_completions
           where household_id = $1
             and undone_at is null
-            and completed_at >= date_trunc('week', now())
+            and completed_at >= date_trunc('month', now())
         `,
         [context.householdId],
       ),
@@ -285,7 +285,7 @@ export async function getDashboardData(
   return {
     context,
     todayTasks: tasksResult.rows,
-    userWeeklyPoints: userPointsResult.rows[0]?.points ?? 0,
-    householdWeeklyPoints: householdPointsResult.rows[0]?.points ?? 0,
+    userMonthlyPoints: userPointsResult.rows[0]?.points ?? 0,
+    householdMonthlyPoints: householdPointsResult.rows[0]?.points ?? 0,
   };
 }

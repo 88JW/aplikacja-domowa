@@ -163,6 +163,30 @@ rozpoznanej czynności. Funkcja wymaga zgody na mikrofon i obsługi Web Speech
 API przez przeglądarkę (najpewniej działa w Chrome). Rozpoznawanie mowy
 realizuje przeglądarka — aplikacja nie zapisuje nagrań audio.
 
+## Domowy Asystent
+
+Pływający przycisk **Asystent** jest dostępny na każdej stronie aplikacji.
+Można pisać lub mówić po polsku; rozmowa bieżącej sesji pozostaje tylko w
+otwartym panelu i nie jest zapisywana jako historia czatu w bazie.
+
+Asystent korzysta z Gemini wyłącznie po stronie serwera. Do modelu trafia
+wiadomość użytkownika oraz potrzebne dane HomeApp, takie jak katalog zadań,
+ostatnie wykonania, plan na dziś i liczba wystawionych worków. Klucz API
+pozostaje w `.env.production` na serwerze i nie jest wysyłany do przeglądarki.
+
+Pierwszy etap pozwala odpowiadać na pytania o dom i zwykłe pytania, np. o
+potrawy ze wskazanych składników, oraz przygotować do zatwierdzenia:
+
+- zapisanie wykonanego zadania,
+- oznaczenie kolejnych worków na śmieci,
+- zaplanowanie zadania na konkretny dzień.
+
+Każda zmiana danych z panelu wymaga przycisku **Potwierdź**. Asystent nie ma
+dostępu do haseł, kluczy API, terminala, bazy jako dowolnego SQL ani do
+usuwania danych. Późniejsze integracje Zigbee, ESP32 i serwerów dodajemy jako
+osobne, ograniczone narzędzia (np. odczyt czujnika lub sprawdzenie stanu
+serwera), również z potwierdzeniem dla działań zmieniających stan.
+
 ## Historia i korekty
 
 Historia pokazuje aktywne i cofnięte wykonania wszystkich domowników. Każdy

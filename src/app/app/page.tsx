@@ -1,7 +1,7 @@
 import { getDashboardData } from "@/lib/home";
 import { requireSsoUser } from "@/lib/sso";
 import Link from "next/link";
-import { getWeeklyCompletionMatrix } from "@/lib/reports";
+import { getMonthlyCompletionMatrix } from "@/lib/reports";
 import { getTaskShortcuts } from "@/lib/shortcuts";
 import {
   addTaskShortcut,
@@ -31,7 +31,7 @@ export default async function AppPage() {
   const user = await requireSsoUser();
   const data = await getDashboardData(user);
   const [matrix, shortcutData, streaks, watering] = await Promise.all([
-    getWeeklyCompletionMatrix(data.context),
+    getMonthlyCompletionMatrix(data.context),
     getTaskShortcuts(data.context),
     getStreakStats(data.context),
     getPlantWateringStatuses(data.context),
@@ -67,12 +67,12 @@ export default async function AppPage() {
 
       <section className="summary" aria-label="Podsumowanie">
         <article className="metric">
-          <strong>{data.userWeeklyPoints}</strong>
-          <span>Twoje punkty w tym tygodniu</span>
+          <strong>{data.userMonthlyPoints}</strong>
+          <span>Twoje punkty w tym miesiącu</span>
         </article>
         <article className="metric">
-          <strong>{data.householdWeeklyPoints}</strong>
-          <span>Punkty całego domu</span>
+          <strong>{data.householdMonthlyPoints}</strong>
+          <span>Punkty całego domu w tym miesiącu</span>
         </article>
         <article className="metric">
           <strong>{data.todayTasks.length}</strong>
@@ -232,7 +232,7 @@ export default async function AppPage() {
 
       <div className="section-heading">
         <h2>Kto co zrobił</h2>
-        <span>Ten tydzień</span>
+        <span>Ten miesiąc</span>
       </div>
 
       <div className="matrix-scroll">

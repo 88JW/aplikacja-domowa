@@ -9,7 +9,7 @@ import { requireSsoUser } from "@/lib/sso";
 import { getTaskShortcuts } from "@/lib/shortcuts";
 import { getStreakStats } from "@/lib/streaks";
 import { formatTaskAttributes } from "@/lib/task-meta";
-import { TabletClock } from "./tablet-clock";
+import { TabletClock } from "@/app/tablet/tablet-clock";
 
 export default async function TabletPage() {
   const user = await requireSsoUser();
@@ -46,8 +46,8 @@ export default async function TabletPage() {
         />
 
         <section className="tablet-summary" aria-label="Podsumowanie">
-          <article><strong>{data.userWeeklyPoints}</strong><span>Twoje punkty</span></article>
-          <article><strong>{data.householdWeeklyPoints}</strong><span>Punkty domu</span></article>
+          <article><strong>{data.userMonthlyPoints}</strong><span>Twoje punkty w miesiącu</span></article>
+          <article><strong>{data.householdMonthlyPoints}</strong><span>Punkty domu w miesiącu</span></article>
           <article><strong>{streaks.householdCurrent}</strong><span>Seria domu</span></article>
           <article><strong>{data.todayTasks.length}</strong><span>Na dzisiaj</span></article>
         </section>

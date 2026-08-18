@@ -4,6 +4,7 @@ import { getUnreadNotificationCount } from "@/lib/notifications";
 import { requireSsoUser } from "@/lib/sso";
 import { ProfileSwitcher } from "./profile/profile-switcher";
 import { Celebration } from "./celebration";
+import { HomeAssistant } from "@/app/components/home-assistant";
 
 const navigation = [
   { href: "/app", icon: "✓", label: "Dzisiaj" },
@@ -32,6 +33,7 @@ export default async function AppLayout({
   return (
     <div className="app-theme" data-profile-theme={profileTheme}>
       <Celebration />
+      <HomeAssistant />
       <div className="profile-switcher-wrap">
         <ProfileSwitcher
           activeProfileId={context.profileId}

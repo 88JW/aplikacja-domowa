@@ -5,10 +5,7 @@ import { requireSsoUser } from "@/lib/sso";
 export default async function RankingPage() {
   const user = await requireSsoUser();
   const context = await ensureHomeContext(user);
-  const [weekly, monthly] = await Promise.all([
-    getRanking(context, "week"),
-    getRanking(context, "month"),
-  ]);
+  const monthly = await getRanking(context, "month");
 
   return (
     <main className="shell">
@@ -19,7 +16,6 @@ export default async function RankingPage() {
         na historię całkowitą.
       </p>
 
-      <RankingTable title="Ten tydzień" items={weekly} />
       <RankingTable title="Ten miesiąc" items={monthly} />
     </main>
   );
