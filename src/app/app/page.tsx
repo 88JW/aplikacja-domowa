@@ -15,6 +15,7 @@ import { getPlantWateringStatuses } from "@/lib/plant-watering";
 import { SearchableTaskSelect } from "@/app/components/searchable-task-select";
 import { DailyReminder } from "./daily-reminder";
 import { QuickTaskCompletion } from "@/app/components/quick-task-completion";
+import { RepeatTaskButton } from "./repeat-task-button";
 
 function getTaskMeta(
   attributes: Parameters<typeof formatTaskAttributes>[0],
@@ -259,8 +260,17 @@ export default async function AppPage() {
               return (
                 <tr key={column.taskTemplateId}>
                   <th scope="row">
-                    <span aria-hidden="true">{column.icon ?? "✓"}</span>
-                    {column.name}
+                    <div className="matrix-task-cell">
+                      <span className="matrix-task-label">
+                        <span aria-hidden="true">{column.icon ?? "✓"}</span>
+                        {column.name}
+                      </span>
+                      <RepeatTaskButton
+                        profileName={data.context.profileDisplayName}
+                        taskName={column.name}
+                        taskTemplateId={column.taskTemplateId}
+                      />
+                    </div>
                   </th>
                   {matrix.rows.map((row) => (
                     <td key={row.profileId}>
