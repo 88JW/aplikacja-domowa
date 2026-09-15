@@ -96,6 +96,14 @@ export default async function MorePage() {
               </div>
               <b aria-hidden="true">›</b>
             </Link>
+            <Link href="/app/monthly-summary">
+              <span aria-hidden="true">🏆</span>
+              <div>
+                <strong>Podsumowanie miesiąca</strong>
+                <small>Kto co wykonał i wynik poprzedniego miesiąca</small>
+              </div>
+              <b aria-hidden="true">›</b>
+            </Link>
             <Link href="/app/stats">
               <span aria-hidden="true">📊</span>
               <div>

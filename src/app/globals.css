@@ -3537,6 +3537,43 @@ h1 {
 .achievement-history-grid small { color: var(--text-muted); }
 .achievement-history-empty { margin-top: 1.5rem; }
 
+.monthly-winner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding: 1.15rem;
+  border: 2px solid var(--primary);
+  border-radius: 1.25rem 0.8rem 1.35rem 0.9rem;
+  background: color-mix(in srgb, var(--accent-pale) 60%, var(--surface));
+  box-shadow: 4px 5px 0 color-mix(in srgb, var(--primary) 16%, transparent);
+}
+.monthly-winner > span { font-size: clamp(2.5rem, 10vw, 4rem); }
+.monthly-winner div { display: grid; gap: 0.15rem; }
+.monthly-winner small, .monthly-winner p { color: var(--text-muted); }
+.monthly-winner h2 { margin: 0; font: 700 clamp(1.35rem, 5vw, 2rem) var(--hand-font); color: var(--primary-strong); }
+.monthly-winner p { margin: 0; }
+.monthly-summary-section { margin-top: 1.75rem; }
+.monthly-member-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 0.8rem; }
+.monthly-member-card {
+  padding: 1rem;
+  border: 2px solid var(--border);
+  border-radius: 1.2rem 0.75rem 1.1rem 0.85rem;
+  background: var(--surface);
+  box-shadow: 3px 4px 0 color-mix(in srgb, var(--primary) 10%, transparent);
+}
+.monthly-member-card header { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.7rem; }
+.monthly-member-card h3, .monthly-member-card p { margin: 0; }
+.monthly-member-card h3 { font: 700 1.25rem var(--hand-font); }
+.monthly-member-card header p, .monthly-member-empty { color: var(--text-muted); font-size: 0.78rem; }
+.monthly-member-card header > strong { color: var(--primary-strong); white-space: nowrap; }
+.monthly-place { display: grid; place-items: center; min-width: 2rem; height: 2rem; border-radius: 50%; background: var(--accent-pale); font-weight: 800; }
+.monthly-task-list { display: grid; gap: 0.15rem; margin: 0.9rem 0 0; padding: 0; list-style: none; }
+.monthly-task-list li { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.5rem; padding: 0.45rem 0; border-top: 1px dashed var(--border); font-size: 0.85rem; }
+.monthly-task-list li > span:first-child { font-size: 1rem; }
+.monthly-task-list strong { color: var(--primary-strong); }
+.monthly-member-empty { margin: 1rem 0 0 !important; padding-top: 0.8rem; border-top: 1px dashed var(--border); }
+
 .stats-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

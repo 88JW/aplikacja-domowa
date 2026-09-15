@@ -3,7 +3,7 @@
   "short_name": "Dom",
   "description": "Wspólne obowiązki, punkty i domowe wyzwania.",
   "id": "/homeapp-v2",
-  "start_url": "/launch?install=v3",
+  "start_url": "/launch?install=v4",
   "scope": "/",
   "display": "standalone",
   "launch_handler": {

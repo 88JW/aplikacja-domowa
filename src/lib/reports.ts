@@ -39,6 +39,22 @@ export type CompletionMatrix = {
   }>;
 };
 
+export type PreviousMonthSummary = {
+  periodStart: Date;
+  total: number;
+  members: Array<{
+    profileId: string;
+    displayName: string;
+    total: number;
+    tasks: Array<{
+      taskTemplateId: string;
+      name: string;
+      icon: string | null;
+      count: number;
+    }>;
+  }>;
+};
+
 export async function getHistory(context: HomeContext, limit = 50) {
   const result = await db.query<HistoryItem>(
     `
@@ -185,5 +201,88 @@ export async function getMonthlyCompletionMatrix(
         total: Object.values(counts).reduce((sum, count) => sum + count, 0),
       };
     }),
+  };
+}
+
+export async function getPreviousMonthSummary(
+  context: HomeContext,
+): Promise<PreviousMonthSummary> {
+  const [membersResult, tasksResult] = await Promise.all([
+    db.query<{
+      profileId: string;
+      displayName: string;
+    }>(
+      `
+        select p.id as "profileId", p.display_name as "displayName"
+        from home_tasks.household_members hm
+        join home_tasks.profiles p on p.id = hm.profile_id
+        where hm.household_id = $1
+        order by p.display_name
+      `,
+      [context.householdId],
+    ),
+    db.query<{
+      profileId: string;
+      taskTemplateId: string;
+      name: string;
+      icon: string | null;
+      count: number;
+    }>(
+      `
+        with month_bounds as (
+          select
+            date_trunc('month', now() at time zone 'Europe/Warsaw') at time zone 'Europe/Warsaw' as current_month_start
+        )
+        select
+          tc.completed_by as "profileId",
+          tt.id as "taskTemplateId",
+          tt.name,
+          tt.icon,
+          count(*)::int as count
+        from home_tasks.task_completions tc
+        join home_tasks.task_templates tt on tt.id = tc.task_template_id
+        cross join month_bounds mb
+        where tc.household_id = $1
+          and tc.undone_at is null
+          and tc.completed_at >= mb.current_month_start - interval '1 month'
+          and tc.completed_at < mb.current_month_start
+        group by tc.completed_by, tt.id, tt.name, tt.icon
+        order by count desc, tt.name
+      `,
+      [context.householdId],
+    ),
+  ]);
+
+  const tasksByProfile = new Map<
+    string,
+    PreviousMonthSummary["members"][number]["tasks"]
+  >();
+
+  for (const task of tasksResult.rows) {
+    const tasks = tasksByProfile.get(task.profileId) ?? [];
+    tasks.push(task);
+    tasksByProfile.set(task.profileId, tasks);
+  }
+
+  const members = membersResult.rows
+    .map((member) => {
+      const tasks = tasksByProfile.get(member.profileId) ?? [];
+      return {
+        ...member,
+        tasks,
+        total: tasks.reduce((sum, task) => sum + task.count, 0),
+      };
+    })
+    .sort((left, right) => right.total - left.total || left.displayName.localeCompare(right.displayName, "pl"));
+
+  const nowInWarsaw = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Europe/Warsaw" }),
+  );
+  const periodStart = new Date(nowInWarsaw.getFullYear(), nowInWarsaw.getMonth() - 1, 1);
+
+  return {
+    periodStart,
+    total: members.reduce((sum, member) => sum + member.total, 0),
+    members,
   };
 }

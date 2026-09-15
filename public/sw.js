@@ -1,7 +1,7 @@
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
-      .open("homeapp-shell-v4")
+      .open("homeapp-shell-v5")
       .then((cache) =>
         cache.addAll([
           "/offline",
@@ -24,7 +24,7 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key.startsWith("homeapp-shell-") && key !== "homeapp-shell-v4")
+            .filter((key) => key.startsWith("homeapp-shell-") && key !== "homeapp-shell-v5")
             .map((key) => caches.delete(key)),
         ),
       )

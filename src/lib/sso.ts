@@ -13,11 +13,12 @@ const EMAIL_ALIASES = new Map([
 
 export async function requireSsoUser(): Promise<SsoUser> {
   const requestHeaders = await headers();
-  const forwardedUser = requestHeaders.get("x-forwarded-user")?.trim();
   const forwardedEmail = requestHeaders
     .get("x-forwarded-email")
     ?.trim()
     .toLowerCase();
+  const forwardedUser =
+    requestHeaders.get("x-forwarded-user")?.trim() ?? forwardedEmail;
 
   if (!forwardedUser) {
     throw new Error(

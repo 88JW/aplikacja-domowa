@@ -36,7 +36,7 @@ export default function RootLayout({
     <html lang="pl">
       <head>
         <link
-          href="/manifest.webmanifest?v=5"
+          href="/manifest.webmanifest?v=6"
           rel="manifest"
         />
       </head>
