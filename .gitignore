@@ -17,3 +17,15 @@ android-twa/signing.properties
 android-twa/*.apk
 android-twa/*.aab
 android-twa/*.idsig
+
+# Local builds & scratchpad artifacts
+.beertaste-scanner-*
+outputs/
+scratch-*
+
+# External / independent homelab services & cluster manifests
+job-matcher/
+deploy/k3s-*
+deploy/kubernetes/
+deploy/nextcloud/
+deploy/opengym/
