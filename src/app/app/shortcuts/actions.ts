@@ -7,6 +7,10 @@ import { requireSsoUser } from "@/lib/sso";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
+  createTaskCompletionNotifications,
+  deliverTaskCompletionNotifications,
+} from "@/lib/task-completion-notifications";
+import {
   queueAchievementCelebration,
   queueTaskCelebration,
 } from "@/lib/celebration";
@@ -74,29 +78,48 @@ export async function completeTaskShortcut(formData: FormData) {
     taskTemplateId: formData.get("taskTemplateId"),
   });
 
-  const result = await db.query(
-    `
-      insert into home_tasks.task_completions (
-        household_id,
-        task_template_id,
-        completed_by
-      )
-      select $3, tt.id, $1
-      from home_tasks.profile_task_shortcuts s
-      join home_tasks.task_templates tt on tt.id = s.task_template_id
-      where s.profile_id = $1
-        and s.task_template_id = $2
-        and tt.household_id = $3
-        and tt.archived_at is null
-      returning id
-    `,
-    [context.profileId, taskTemplateId, context.householdId],
-  );
+  const client = await db.connect();
+  let notificationIds: string[] = [];
 
-  if (result.rowCount !== 1) {
-    throw new Error("Skrót nie istnieje albo zadanie jest niedostępne.");
+  try {
+    await client.query("begin");
+    const result = await client.query<{ id: string }>(
+      `
+        insert into home_tasks.task_completions (
+          household_id,
+          task_template_id,
+          completed_by
+        )
+        select $3, tt.id, $1
+        from home_tasks.profile_task_shortcuts s
+        join home_tasks.task_templates tt on tt.id = s.task_template_id
+        where s.profile_id = $1
+          and s.task_template_id = $2
+          and tt.household_id = $3
+          and tt.archived_at is null
+        returning id
+      `,
+      [context.profileId, taskTemplateId, context.householdId],
+    );
+
+    if (result.rowCount !== 1) {
+      throw new Error("Skrót nie istnieje albo zadanie jest niedostępne.");
+    }
+
+    notificationIds = await createTaskCompletionNotifications(
+      client,
+      context,
+      result.rows[0].id,
+    );
+    await client.query("commit");
+  } catch (error) {
+    await client.query("rollback");
+    throw error;
+  } finally {
+    client.release();
   }
 
+  await deliverTaskCompletionNotifications(notificationIds);
   const earnedAchievements = await evaluateAchievements(context);
   if (earnedAchievements[0]) {
     await queueAchievementCelebration(
@@ -108,6 +131,8 @@ export async function completeTaskShortcut(formData: FormData) {
     await queueTaskCelebration(context.profileDisplayName);
   }
   revalidatePath("/app");
+  revalidatePath("/app/notifications");
+  revalidatePath("/app", "layout");
   revalidatePath("/app/history");
   revalidatePath("/app/ranking");
   revalidatePath("/app/achievements");

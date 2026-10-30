@@ -221,6 +221,13 @@ Przy zaplanowaniu zadania:
 - osoba planująca nie dostaje komunikatu o własnej operacji,
 - kliknięcie komunikatu prowadzi do planu na właściwy dzień.
 
+Po wykonaniu zadania pozostali domownicy otrzymują komunikat z imieniem
+wykonawcy i nazwą zadania. Dotyczy to zadań planowanych, skrótów i zadań
+wykonanych bez planowania. Wykonawca nie dostaje powiadomienia o własnym
+zadaniu. Kliknięcie komunikatu otwiera historię. Alert jest zapisywany razem
+z wykonaniem zadania, a push wysyłany po zatwierdzeniu transakcji. Klucz
+deduplikacji zapobiega ponownemu powiadomieniu o tym samym wpisie wykonania.
+
 Harmonogram uruchamiany co godzinę przygotowuje również przypomnienia:
 
 - rano o zadaniach czekających na dziś,
@@ -242,11 +249,23 @@ przeczytane.
 4. Użyj przycisku „Wyślij test”.
 
 Subskrypcja jest zapisywana osobno dla każdego urządzenia. Można ją wyłączyć
+na jednym telefonie, a drugi nadal będzie otrzymywał powiadomienia. Telefon
+otrzymuje powiadomienia dla zalogowanego konta Google; przełącznik aktywnego
+domownika służy do zapisywania zadań i nie zmienia odbiorcy push. Po otwarciu
+ustawień aplikacja potwierdza zapis istniejącej subskrypcji na serwerze i pokazuje
+imię odbiorcy. Test dotyczy bieżącego urządzenia i zgłasza brak subskrypcji lub
+błąd wysyłki zamiast pokazywać pozorny sukces.
+
+Powiadomienia na urządzeniu można wyłączyć
 bez wpływu na centrum powiadomień wewnątrz aplikacji. Wygasłe subskrypcje są
 automatycznie usuwane po odpowiedzi `404` albo `410` od usługi push.
 
+W K3s klucze VAPID przechowuje Secret `homeapp-web-push`. Skrypt
+`deploy/configure-k3s-web-push.sh` tworzy je jednorazowo i podłącza do HomeApp,
+zachowując tę samą parę przy kolejnych wdrożeniach.
+
 Na iPhonie Web Push wymaga zainstalowania HomeApp na ekranie początkowym.
-Klucze VAPID są przechowywane wyłącznie w `.env.production` i nie powinny być
+W starszym wdrożeniu Docker klucze VAPID były przechowywane w `.env.production` i nie powinny być
 zmieniane bez potrzeby, ponieważ urządzenia musiałyby zapisać się ponownie.
 
 ## Strona główna

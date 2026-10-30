@@ -14,7 +14,7 @@ const subscriptionSchema = z.object({
 
 export async function POST(request: NextRequest) {
   const user = await requireSsoUser();
-  const context = await ensureHomeContext(user);
+  const context = await ensureHomeContext(user, { useActiveProfile: false });
   const subscription = subscriptionSchema.parse(await request.json());
 
   await db.query(
@@ -45,12 +45,12 @@ export async function POST(request: NextRequest) {
     ],
   );
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, profileName: context.profileDisplayName });
 }
 
 export async function DELETE(request: NextRequest) {
   const user = await requireSsoUser();
-  const context = await ensureHomeContext(user);
+  const context = await ensureHomeContext(user, { useActiveProfile: false });
   const values = z
     .object({ endpoint: z.url() })
     .parse(await request.json());

@@ -27,11 +27,21 @@ function getVapidDetails() {
   };
 }
 
-export async function sendPushForNotifications(notificationIds: string[]) {
+export async function sendPushForNotifications(
+  notificationIds: string[],
+  endpoint?: string,
+) {
   const vapidDetails = getVapidDetails();
+  const delivery = {
+    configured: Boolean(vapidDetails),
+    attempted: 0,
+    sent: 0,
+    failed: 0,
+    expired: 0,
+  };
 
   if (!vapidDetails || notificationIds.length === 0) {
-    return;
+    return delivery;
   }
 
   const result = await db.query<PushRecipient>(
@@ -49,9 +59,11 @@ export async function sendPushForNotifications(notificationIds: string[]) {
       join home_tasks.push_subscriptions ps
         on ps.profile_id = n.recipient_profile_id
       where n.id = any($1::uuid[])
+        and ($2::text is null or ps.endpoint = $2)
     `,
-    [notificationIds],
+    [notificationIds, endpoint ?? null],
   );
+  delivery.attempted = result.rows.length;
 
   await Promise.all(
     result.rows.map(async (recipient) => {
@@ -73,10 +85,12 @@ export async function sendPushForNotifications(notificationIds: string[]) {
           {
             TTL: 60 * 60 * 24,
             urgency: "normal",
+            timeout: 10_000,
             topic: `homeapp-${recipient.notificationId.slice(0, 16)}`,
             vapidDetails,
           },
         );
+        delivery.sent += 1;
 
         await db.query(
           `
@@ -96,6 +110,7 @@ export async function sendPushForNotifications(notificationIds: string[]) {
             : null;
 
         if (statusCode === 404 || statusCode === 410) {
+          delivery.expired += 1;
           await db.query(
             "delete from home_tasks.push_subscriptions where id = $1",
             [recipient.subscriptionId],
@@ -103,6 +118,7 @@ export async function sendPushForNotifications(notificationIds: string[]) {
           return;
         }
 
+        delivery.failed += 1;
         await db.query(
           `
             update home_tasks.push_subscriptions
@@ -114,4 +130,5 @@ export async function sendPushForNotifications(notificationIds: string[]) {
       }
     }),
   );
+  return delivery;
 }

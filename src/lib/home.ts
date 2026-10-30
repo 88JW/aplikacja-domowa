@@ -40,8 +40,11 @@ export type DashboardData = {
 
 export async function ensureHomeContext(
   user: SsoUser,
+  options: { useActiveProfile?: boolean } = {},
 ): Promise<HomeContext> {
-  const selectedCookie = (await cookies()).get(ACTIVE_PROFILE_COOKIE)?.value;
+  const selectedCookie = options.useActiveProfile === false
+    ? undefined
+    : (await cookies()).get(ACTIVE_PROFILE_COOKIE)?.value;
   const selectedProfileId =
     selectedCookie &&
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(

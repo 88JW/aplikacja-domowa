@@ -7,6 +7,10 @@ import { requireSsoUser } from "@/lib/sso";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
+  createTaskCompletionNotifications,
+  deliverTaskCompletionNotifications,
+} from "@/lib/task-completion-notifications";
+import {
   queueAchievementCelebration,
   queueTaskCelebration,
 } from "@/lib/celebration";
@@ -26,6 +30,7 @@ export async function completeTask(formData: FormData) {
   });
   const context = await ensureHomeContext(user);
   const client = await db.connect();
+  let notificationIds: string[] = [];
 
   try {
     await client.query("begin");
@@ -47,7 +52,7 @@ export async function completeTask(formData: FormData) {
       throw new Error("Zadanie nie istnieje albo zostało już wykonane.");
     }
 
-    await client.query(
+    const completion = await client.query<{ id: string }>(
       `
         insert into home_tasks.task_completions (
           household_id,
@@ -56,6 +61,7 @@ export async function completeTask(formData: FormData) {
           completed_by
         )
         values ($1, $2, $3, $4)
+        returning id
       `,
       [
         context.householdId,
@@ -65,6 +71,11 @@ export async function completeTask(formData: FormData) {
       ],
     );
 
+    notificationIds = await createTaskCompletionNotifications(
+      client,
+      context,
+      completion.rows[0].id,
+    );
     await client.query("commit");
   } catch (error) {
     await client.query("rollback");
@@ -73,6 +84,7 @@ export async function completeTask(formData: FormData) {
     client.release();
   }
 
+  await deliverTaskCompletionNotifications(notificationIds);
   const earnedAchievements = await evaluateAchievements(context);
   if (earnedAchievements[0]) {
     await queueAchievementCelebration(
@@ -84,6 +96,8 @@ export async function completeTask(formData: FormData) {
     await queueTaskCelebration(context.profileDisplayName);
   }
   revalidatePath("/app");
+  revalidatePath("/app/notifications");
+  revalidatePath("/app", "layout");
   revalidatePath("/app/achievements");
   revalidatePath("/app/history");
   revalidatePath("/app/ranking");
@@ -99,27 +113,46 @@ export async function completeUnplannedTask(formData: FormData) {
   });
   const context = await ensureHomeContext(user);
 
-  const result = await db.query(
-    `
-      insert into home_tasks.task_completions (
-        household_id,
-        task_template_id,
-        completed_by
-      )
-      select $2, tt.id, $3
-      from home_tasks.task_templates tt
-      where tt.id = $1
-        and tt.household_id = $2
-        and tt.archived_at is null
-      returning id
-    `,
-    [taskTemplateId, context.householdId, context.profileId],
-  );
+  const client = await db.connect();
+  let notificationIds: string[] = [];
 
-  if (result.rowCount !== 1) {
-    throw new Error("Zadanie nie istnieje albo jest niedostępne.");
+  try {
+    await client.query("begin");
+    const result = await client.query<{ id: string }>(
+      `
+        insert into home_tasks.task_completions (
+          household_id,
+          task_template_id,
+          completed_by
+        )
+        select $2, tt.id, $3
+        from home_tasks.task_templates tt
+        where tt.id = $1
+          and tt.household_id = $2
+          and tt.archived_at is null
+        returning id
+      `,
+      [taskTemplateId, context.householdId, context.profileId],
+    );
+
+    if (result.rowCount !== 1) {
+      throw new Error("Zadanie nie istnieje albo jest niedostępne.");
+    }
+
+    notificationIds = await createTaskCompletionNotifications(
+      client,
+      context,
+      result.rows[0].id,
+    );
+    await client.query("commit");
+  } catch (error) {
+    await client.query("rollback");
+    throw error;
+  } finally {
+    client.release();
   }
 
+  await deliverTaskCompletionNotifications(notificationIds);
   const earnedAchievements = await evaluateAchievements(context);
   if (earnedAchievements[0]) {
     await queueAchievementCelebration(
@@ -131,6 +164,8 @@ export async function completeUnplannedTask(formData: FormData) {
     await queueTaskCelebration(context.profileDisplayName);
   }
   revalidatePath("/app");
+  revalidatePath("/app/notifications");
+  revalidatePath("/app", "layout");
   revalidatePath("/app/history");
   revalidatePath("/app/ranking");
   revalidatePath("/app/achievements");

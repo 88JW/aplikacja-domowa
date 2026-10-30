@@ -118,7 +118,7 @@ export default async function MorePage() {
           <span aria-hidden="true">🔔</span>
           <div>
             <strong>Powiadomienia</strong>
-            <small>Przypisania zadań i ustawienia urządzenia</small>
+            <small>Wykonane zadania, przypisania i ustawienia urządzenia</small>
           </div>
           <b aria-hidden="true">›</b>
         </Link>
