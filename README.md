@@ -228,6 +228,12 @@ zadaniu. Kliknięcie komunikatu otwiera historię. Alert jest zapisywany razem
 z wykonaniem zadania, a push wysyłany po zatwierdzeniu transakcji. Klucz
 deduplikacji zapobiega ponownemu powiadomieniu o tym samym wpisie wykonania.
 
+Po udanym zapisaniu wykonania aplikacja pokazuje wykonawcy okno
+„Gratulacje, [imię]!” z nazwą zadania, informacją o punkcie i zapisie w historii.
+Potwierdzenie działa przy kolejnych wykonaniach z listy, szybkich zadań,
+tabeli i w trybie tabletu. Zdobyta odznaka pojawia się w tym samym oknie.
+Okno można zamknąć przyciskiem „Super!”, klawiszem Escape lub kliknięciem tła.
+
 Harmonogram uruchamiany co godzinę przygotowuje również przypomnienia:
 
 - rano o zadaniach czekających na dziś,

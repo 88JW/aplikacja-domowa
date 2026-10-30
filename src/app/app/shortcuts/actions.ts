@@ -10,10 +10,7 @@ import {
   createTaskCompletionNotifications,
   deliverTaskCompletionNotifications,
 } from "@/lib/task-completion-notifications";
-import {
-  queueAchievementCelebration,
-  queueTaskCelebration,
-} from "@/lib/celebration";
+import { queueTaskCelebration } from "@/lib/celebration";
 
 const shortcutSchema = z.object({
   taskTemplateId: z.string().uuid(),
@@ -80,6 +77,7 @@ export async function completeTaskShortcut(formData: FormData) {
 
   const client = await db.connect();
   let notificationIds: string[] = [];
+  let taskName = "";
 
   try {
     await client.query("begin");
@@ -111,6 +109,14 @@ export async function completeTaskShortcut(formData: FormData) {
       context,
       result.rows[0].id,
     );
+    const completedTask = await client.query<{ name: string }>(
+      `select tt.name
+       from home_tasks.task_completions tc
+       join home_tasks.task_templates tt on tt.id = tc.task_template_id
+       where tc.id = $1 and tc.household_id = $2`,
+      [result.rows[0].id, context.householdId],
+    );
+    taskName = completedTask.rows[0].name;
     await client.query("commit");
   } catch (error) {
     await client.query("rollback");
@@ -121,15 +127,11 @@ export async function completeTaskShortcut(formData: FormData) {
 
   await deliverTaskCompletionNotifications(notificationIds);
   const earnedAchievements = await evaluateAchievements(context);
-  if (earnedAchievements[0]) {
-    await queueAchievementCelebration(
-      earnedAchievements[0].name,
-      earnedAchievements[0].icon,
-      earnedAchievements.length - 1,
-    );
-  } else {
-    await queueTaskCelebration(context.profileDisplayName);
-  }
+  await queueTaskCelebration(
+    context.profileDisplayName,
+    taskName,
+    earnedAchievements,
+  );
   revalidatePath("/app");
   revalidatePath("/app/notifications");
   revalidatePath("/app", "layout");

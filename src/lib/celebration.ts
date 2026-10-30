@@ -2,11 +2,21 @@ import { cookies } from "next/headers";
 
 export const CELEBRATION_COOKIE = "homeapp-celebration";
 
-export async function queueTaskCelebration(displayName: string) {
+export async function queueTaskCelebration(
+  displayName: string,
+  taskName: string,
+  achievements: Array<{ name: string; icon: string }> = [],
+) {
   const value = encodeURIComponent(
     JSON.stringify({
-      title: "+1 punkt!",
-      message: `Brawo, ${displayName}! Dom jest o krok bardziej ogarnięty.`,
+      id: crypto.randomUUID(),
+      title: `Gratulacje, ${displayName}!`,
+      message: `Zadanie „${taskName}” zostało wykonane.`,
+      detail: "+1 punkt · Wykonanie zapisane w historii",
+      achievement: achievements.length > 0,
+      achievementMessage: achievements[0]
+        ? `${achievements[0].icon} Zdobyto odznakę „${achievements[0].name}”${achievements.length > 1 ? ` i ${achievements.length - 1} kolejne.` : "."}`
+        : undefined,
     }),
   );
 
@@ -26,6 +36,7 @@ export async function queueAchievementCelebration(
 ) {
   const value = encodeURIComponent(
     JSON.stringify({
+      id: crypto.randomUUID(),
       title: `${icon} Nowa odznaka!`,
       message:
         extraCount > 0

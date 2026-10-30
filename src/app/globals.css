@@ -2994,7 +2994,10 @@ h1 {
   position: relative;
   z-index: 2;
   display: grid;
-  width: min(100%, 22rem);
+  width: min(100%, 25rem);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  overflow-wrap: anywhere;
   place-items: center;
   border: 3px solid var(--ink);
   border-radius: 2rem 1.2rem 1.8rem 1.35rem / 1.3rem 2rem 1.2rem 1.8rem;
@@ -3019,6 +3022,11 @@ h1 {
 
 .celebration-card p {
   margin: 0.5rem 0;
+}
+
+.celebration-card .primary-button {
+  margin-top: 1rem;
+  min-width: 9rem;
 }
 
 .celebration-card small {

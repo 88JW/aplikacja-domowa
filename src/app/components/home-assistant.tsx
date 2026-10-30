@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Action =
   | { type: "complete_task"; taskTemplateId: string; label: string }
@@ -12,6 +13,7 @@ type SpeechRecognitionLike = { lang: string; interimResults: boolean; continuous
 type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
 
 export function HomeAssistant() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -36,6 +38,7 @@ export function HomeAssistant() {
     try {
       const response = await fetch("/api/assistant", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: "execute", action }) });
       const result = await response.json() as { reply: string };
+      if (response.ok) router.refresh();
       setMessages((items) => [...items.map((item) => item.action === action ? { ...item, action: null } : item), { role: "assistant", content: result.reply }]);
     } finally { setLoading(false); }
   }
