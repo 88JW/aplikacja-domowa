@@ -5,11 +5,12 @@ import { ensureHomeContext } from "@/lib/home";
 import { requireSsoUser } from "@/lib/sso";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import type { WasteCollectionKind } from "@/lib/waste";
 
 const bagSchema = z.number().int().min(1).max(8);
 const collectionSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  kind: z.enum(["all", "bio_residual"]),
+  kind: z.enum(["all", "bio_residual", "bio"]),
 });
 
 export async function toggleWasteBag(bagNumber: number, month: string) {
@@ -35,7 +36,7 @@ export async function toggleWasteBag(bagNumber: number, month: string) {
   revalidatePath("/app/trash");
 }
 
-export async function setWasteCollection(date: string, kind: "all" | "bio_residual") {
+export async function setWasteCollection(date: string, kind: WasteCollectionKind) {
   const user = await requireSsoUser();
   const context = await ensureHomeContext(user);
   const values = collectionSchema.parse({ date, kind });

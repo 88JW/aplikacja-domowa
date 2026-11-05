@@ -185,7 +185,7 @@ a {
   bottom: 0;
   left: 0;
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   width: min(calc(100% - 1rem), 44rem);
   margin: 0 auto 0.5rem;
   overflow: hidden;
@@ -3694,6 +3694,7 @@ h1 {
 .waste-legend span { border-radius: 999px; padding: 0.25rem 0.5rem; }
 .waste-all { background: #dceeff; color: #285c91; }
 .waste-bio { background: #e0f2d9; color: #397338; }
+.waste-bio-only { background: #f4e4d5; color: #795032; }
 .waste-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0.3rem; }
 .waste-weekday { overflow: hidden; color: var(--text-muted); font-size: 0.62rem; font-weight: 800; text-align: center; text-transform: capitalize; }
 .waste-day { display: grid; min-height: 3.75rem; align-content: start; gap: 0.15rem; border: 1px dashed var(--border); border-radius: 0.5rem; padding: 0.35rem 0.2rem; color: var(--text); background: var(--background); cursor: pointer; text-align: left; }
@@ -3702,6 +3703,7 @@ h1 {
 .waste-day small { font-size: 0.49rem; line-height: 1.05; }
 .waste-day-all { border-color: #83b9ee; background: #edf7ff; color: #285c91; }
 .waste-day-bio_residual { border-color: #86bd82; background: #eff9eb; color: #397338; }
+.waste-day-bio { border-color: #c4946a; background: #fbf0e6; color: #795032; }
 .waste-day-editor { display: grid; gap: 0.65rem; margin-top: 0.9rem; border-top: 1px dashed var(--border); padding-top: 0.85rem; }
 .waste-day-editor > strong { font-size: 0.76rem; text-transform: capitalize; }
 .waste-day-editor > div { display: flex; flex-wrap: wrap; gap: 0.45rem; }
@@ -3718,3 +3720,4 @@ h1 {
   .waste-bag { min-height: 4.5rem; }
   .waste-day { min-height: 3.25rem; }
 }
+.pet-manage { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-top: .7rem; }

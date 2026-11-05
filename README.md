@@ -239,6 +239,10 @@ Harmonogram uruchamiany co godzinę przygotowuje również przypomnienia:
 - rano o zadaniach czekających na dziś,
 - po godzinie 18:00 o zadaniach zaplanowanych na jutro,
 - osobnym komunikatem o podlewaniu kwiatów na parterze lub piętrze.
+- o niewykonanych zadaniach zwierzaków rano i wieczorem, zgodnie z ich harmonogramem.
+
+W K3s harmonogram definiuje `deploy/kubernetes/homeapp-reminders.yaml`; aplikacja
+i harmonogram korzystają ze wspólnego sekretu `homeapp-cron` (`CRON_SECRET`).
 
 Klucze deduplikacji sprawiają, że ponowne uruchomienie harmonogramu nie tworzy
 drugiego identycznego powiadomienia.
@@ -476,6 +480,14 @@ Najważniejsze tabele:
 - `household_achievements`
 - `waste_bag_outings` — wystawione worki, oddzielnie dla każdego miesiąca
 - `waste_collection_days` — terminy oraz rodzaj odbioru śmieci
+- `pet_tasks` i `pet_task_completions` — wspólne zadania zwierzaków i ich wykonania bez punktów
+
+Panel zwierzaków pokazuje miesięczną liczbę wykonań dla każdego domownika,
+zestawienie według zadań oraz ostatnią historię. Planowane poranne i wieczorne
+czynności są liczone raz na daną porę, a dodatkowe wykonania można zapisywać
+wielokrotnie. Te wyniki nie są doliczane do punktów zadań domowych.
+Każdy domownik ma własne szybkie zadania; spacer i kuweta mają licznik do
+najbliższej niewykonanej pory o 7:00 albo 18:00 czasu warszawskiego.
 
 ## Migracje
 
@@ -497,6 +509,11 @@ Migracje znajdują się w katalogu `database/migrations`.
 | `012_achievement_progress_and_reminders.sql` | postęp odznak, nowe połączenia i bezpieczne przypomnienia |
 | `013_indoor_plants.sql` | kwiaty domowe i cykl podlewania liczony od wykonania |
 | `014_waste_collection.sql` | liczenie wystawionych worków i kalendarz odbiorów |
+| `015_consolidate_wojtek_login_alias.sql` | uporządkowanie aliasu logowania |
+| `016_pets.sql` | zadania zwierzaków, wykonania i przykładowa lista |
+| `017_pet_extra_completions.sql` | wielokrotne dodatkowe wykonania zwierzaków |
+| `018_pet_shortcuts.sql` | skróty osobiste i liczniki spaceru oraz kuwety |
+| `019_waste_bio_only.sql` | możliwość oznaczenia odbioru samego bio |
 
 Migracje są uruchamiane kolejno za pomocą `psql` jako administrator bazy.
 

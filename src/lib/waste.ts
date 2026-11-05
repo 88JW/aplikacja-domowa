@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import type { HomeContext } from "@/lib/home";
 
-export type WasteCollectionKind = "all" | "bio_residual";
+export type WasteCollectionKind = "all" | "bio_residual" | "bio";
 
 export type WasteCollectionDay = {
   date: string;

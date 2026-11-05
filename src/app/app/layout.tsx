@@ -12,6 +12,7 @@ const navigation = [
   { href: "/app/history", icon: "◴", label: "Historia" },
   { href: "/app/notifications", icon: "🔔", label: "Alerty" },
   { href: "/app/achievements", icon: "🏆", label: "Cele" },
+  { href: "/app/pets", icon: "🐾", label: "Zwierzaki" },
   { href: "/app/trash", icon: "🗑️", label: "Śmieci" },
   { href: "/app/more", icon: "•••", label: "Więcej" },
 ];

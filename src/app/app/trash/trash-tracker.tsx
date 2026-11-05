@@ -85,7 +85,7 @@ export function TrashTracker({ month, markedBags, collections }: Props) {
             <Link aria-label="Następny miesiąc" href={monthHref(next)}>›</Link>
           </div>
         </div>
-        <div className="waste-legend"><span className="waste-all">Wszystkie: segregowane, bio i niesegregowane</span><span className="waste-bio">Bio i niesegregowane</span></div>
+        <div className="waste-legend"><span className="waste-all">Wszystkie: segregowane, bio i niesegregowane</span><span className="waste-bio">Bio i niesegregowane</span><span className="waste-bio-only">Tylko bio</span></div>
         <div className="waste-calendar-grid">
           {Array.from({ length: 7 }, (_, index) => (
             <span className="waste-weekday" key={index}>{weekdayFormatter.format(new Date(2024, 0, index + 1))}</span>
@@ -95,7 +95,7 @@ export function TrashTracker({ month, markedBags, collections }: Props) {
             const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), index + 1);
             const value = formatDate(date);
             const kind = collectionByDate.get(value);
-            return <button className={`waste-day${kind ? ` waste-day-${kind}` : ""}${selectedDate === value ? " is-selected" : ""}`} key={value} onClick={() => setSelectedDate(value)} type="button"><time dateTime={value}>{index + 1}</time>{kind && <small>{kind === "all" ? "Wszystkie" : "Bio + zm."}</small>}</button>;
+            return <button className={`waste-day${kind ? ` waste-day-${kind}` : ""}${selectedDate === value ? " is-selected" : ""}`} key={value} onClick={() => setSelectedDate(value)} type="button"><time dateTime={value}>{index + 1}</time>{kind && <small>{kind === "all" ? "Wszystkie" : kind === "bio" ? "Bio" : "Bio + zm."}</small>}</button>;
           })}
         </div>
         {selectedDate && (
@@ -104,6 +104,7 @@ export function TrashTracker({ month, markedBags, collections }: Props) {
             <div>
               <button className="primary-button" disabled={isPending} onClick={() => startTransition(() => setWasteCollection(selectedDate, "all"))} type="button">Wszystkie śmieci</button>
               <button className="secondary-button" disabled={isPending} onClick={() => startTransition(() => setWasteCollection(selectedDate, "bio_residual"))} type="button">Bio + niesegregowane</button>
+              <button className="secondary-button" disabled={isPending} onClick={() => startTransition(() => setWasteCollection(selectedDate, "bio"))} type="button">Tylko bio</button>
               {selectedKind && <button className="waste-remove" disabled={isPending} onClick={() => startTransition(() => { removeWasteCollection(selectedDate); setSelectedDate(null); })} type="button">Usuń odbiór</button>}
             </div>
           </div>

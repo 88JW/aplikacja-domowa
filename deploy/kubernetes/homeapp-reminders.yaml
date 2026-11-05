@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: homeapp-reminders
+spec:
+  schedule: "17 * * * *"
+  timeZone: Europe/Warsaw
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 120
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: reminders
+              image: node:22-alpine
+              command: ["node", "-e"]
+              args:
+                - |
+                  fetch('http://homeapp-svc/api/cron/reminders', {
+                    method: 'POST',
+                    headers: { authorization: `Bearer ${process.env.CRON_SECRET}` },
+                    signal: AbortSignal.timeout(60000),
+                  }).then(async response => {
+                    const body = await response.text();
+                    console.log(`HTTP ${response.status}: ${body}`);
+                    if (!response.ok) process.exitCode = 1;
+                  }).catch(error => { console.error(error); process.exitCode = 1; });
+              env:
+                - name: CRON_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: homeapp-cron
+                      key: CRON_SECRET

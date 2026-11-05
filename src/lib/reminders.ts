@@ -104,6 +104,27 @@ export async function generateTaskReminders() {
     notificationIds.push(...result.rows.map((item) => item.id));
   }
 
+  const petSlot = hour >= 18 ? "evening" : hour >= 7 ? "morning" : null;
+  if (petSlot) {
+    const petReminders = await db.query<{ id: string }>(
+      `insert into home_tasks.notifications
+        (household_id, recipient_profile_id, notification_type, title, body, href, dedupe_key)
+       select t.household_id, hm.profile_id, 'pet_reminder',
+         case when $1 = 'morning' then '🐾 Poranna opieka nad zwierzakami' else '🐾 Wieczorna opieka nad zwierzakami' end,
+         t.name, '/app/pets', concat('pet:', t.id, ':', (now() at time zone 'Europe/Warsaw')::date, ':', $1, ':', hm.profile_id)
+       from home_tasks.pet_tasks t
+       join home_tasks.household_members hm on hm.household_id = t.household_id
+       where t.archived_at is null and t.schedule in ($1, 'both')
+         and not exists (select 1 from home_tasks.pet_task_completions c
+           where c.task_id = t.id and c.slot = $1
+             and c.completion_date = (now() at time zone 'Europe/Warsaw')::date)
+       on conflict (recipient_profile_id, dedupe_key) where dedupe_key is not null do nothing
+       returning id`,
+      [petSlot],
+    );
+    notificationIds.push(...petReminders.rows.map((item) => item.id));
+  }
+
   await sendPushForNotifications(notificationIds);
   return notificationIds.length;
 }
